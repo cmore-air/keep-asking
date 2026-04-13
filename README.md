@@ -15,7 +15,7 @@ The prompt is injected automatically on every message — no configuration files
 Give the following instruction to your AI assistant (Claude Code, GitHub Copilot CLI, OpenCode, Cursor, etc.):
 
 ```
-Follow the installation instructions at https://github.com/cmore-air/prompt-appender/blob/main/INSTALL.md
+Follow the installation instructions at https://github.com/cmore-air/keep-asking/blob/main/INSTALL.md
 ```
 
 ---
@@ -32,11 +32,11 @@ Uses the `chat.message` hook from `@opencode-ai/plugin` SDK. The prompt is injec
 
 ```bash
 # Linux / macOS
-git clone https://github.com/cmore-air/prompt-appender ~/.local/share/keep-asking
+git clone https://github.com/cmore-air/keep-asking ~/.local/share/keep-asking
 cd ~/.local/share/keep-asking && npm install && npm run build
 
 # Windows
-git clone https://github.com/cmore-air/prompt-appender %LOCALAPPDATA%\keep-asking
+git clone https://github.com/cmore-air/keep-asking %LOCALAPPDATA%\keep-asking
 cd %LOCALAPPDATA%\keep-asking && npm install && npm run build
 ```
 
@@ -119,3 +119,5 @@ npm run build   # produces dist/index.js and dist/claude-hook.js
 ## License
 
 MIT
+
+

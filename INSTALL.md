@@ -13,7 +13,7 @@ Do NOT skip any step. Do NOT ask for confirmation between steps. Execute everyth
 <STEP_1>
 <title>Clone the repository</title>
 
-Clone https://github.com/cmore-air/prompt-appender to a permanent location:
+Clone https://github.com/cmore-air/keep-asking to a permanent location:
 - Linux / macOS:  ~/.local/share/keep-asking
 - Windows:        %LOCALAPPDATA%\keep-asking
 
@@ -98,5 +98,7 @@ After ALL steps are done, you MUST report:
 ```
 
 > **Tip:** You can also ask your AI to fetch the raw prompt directly:
-> `curl -fsSL https://raw.githubusercontent.com/cmore-air/prompt-appender/main/INSTALL.md`
+> `curl -fsSL https://raw.githubusercontent.com/cmore-air/keep-asking/main/INSTALL.md`
 > Then tell it to find the "Quick Install" section and follow the instructions.
+
+
