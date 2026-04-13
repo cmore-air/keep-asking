@@ -1,12 +1,12 @@
 {
   "name": "prompt-appender",
   "version": "1.0.0",
-  "description": "Automatically appends configurable prompts to every user message. Supports both OpenCode and Claude Code.",
+  "description": "Appends a prompt to every user message so the AI always asks follow-up questions instead of terminating the conversation.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "esbuild src/index.ts src/claude-hook.ts src/copilot-sync.ts --bundle --platform=node --format=esm --outdir=dist --external:@opencode-ai/plugin --external:@opencode-ai/sdk && tsc --emitDeclarationOnly"
+    "build": "esbuild src/index.ts src/claude-hook.ts --bundle --platform=node --format=esm --outdir=dist --external:@opencode-ai/plugin --external:@opencode-ai/sdk && tsc --emitDeclarationOnly"
   },
   "dependencies": {
     "@opencode-ai/plugin": "^1.0.162"
