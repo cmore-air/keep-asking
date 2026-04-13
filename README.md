@@ -27,10 +27,8 @@ You MUST verify the clone succeeded before proceeding.
 <title>Install dependencies and build</title>
 
 cd into the installation directory. You MUST run these commands:
-  bun install
-  bun run build
-
-If bun is not installed, install it first from https://bun.sh.
+  npm install
+  npm run build
 
 After build, you MUST verify ALL of the following files exist:
   - dist/index.js
@@ -220,8 +218,8 @@ OpenCode plugin uses the `chat.message` hook from `@opencode-ai/plugin` SDK. Whe
 
 ```bash
 cd /path/to/prompt-appender
-bun install
-bun run build
+npm install
+npm run build
 ```
 
 **Step 2: Register the plugin in OpenCode config**
@@ -304,8 +302,8 @@ Claude Code uses a `UserPromptSubmit` hook. When a user submits a prompt:
 
 ```bash
 cd /path/to/prompt-appender
-bun install
-bun run build
+npm install
+npm run build
 ```
 
 This produces `dist/claude-hook.js`.
@@ -372,7 +370,7 @@ Create `~/.claude/prompt-appender.jsonc`:
     {
       "name": "ask-before-end",
       "enabled": true,
-      "content": "<MANDATORY_RULE>\\nBEFORE ending your response, you MUST call the askQuestions tool.\\nNEVER end without first calling askQuestions.\\n</MANDATORY_RULE>"
+      "content": "<MANDATORY_RULE>\nBEFORE ending your response, you MUST call the askQuestions tool.\nNEVER end without first calling askQuestions.\n</MANDATORY_RULE>"
     }
   ]
 }
@@ -456,8 +454,8 @@ The `copilot-sync` script reads your `prompt-appender.jsonc` config and writes t
 
 ```bash
 cd /path/to/prompt-appender
-bun install
-bun run build
+npm install
+npm run build
 ```
 
 This produces `dist/copilot-sync.js`.
@@ -554,10 +552,10 @@ Running sync again updates only the marker block — your other content is never
 
 ```bash
 # Install dependencies
-bun install
+npm install
 
-# Build (produces dist/index.js and dist/claude-hook.js)
-bun run build
+# Build (produces dist/index.js, dist/claude-hook.js, and dist/copilot-sync.js)
+npm run build
 ```
 
 ## License

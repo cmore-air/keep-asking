@@ -38,8 +38,11 @@ const PROJECT_CONFIG_FILES = [
   ".prompt-appender.json",
 ];
 
-/** 全局配置目录 */
-const GLOBAL_CONFIG_DIR = join(homedir(), ".config", "opencode");
+/** 全局配置目录（按优先级排序） */
+const GLOBAL_CONFIG_DIRS = [
+  join(homedir(), ".config", "opencode"),
+  join(homedir(), ".claude"),
+];
 
 /** 全局配置文件名（按优先级排序） */
 const GLOBAL_CONFIG_FILES = [
@@ -177,11 +180,13 @@ export function loadConfig(projectDirectory: string): PromptAppenderConfig {
     if (config) return config;
   }
 
-  // 2. 查找全局配置
-  const globalConfigPath = findConfigFile(GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_FILES);
-  if (globalConfigPath) {
-    const config = loadConfigFromFile(globalConfigPath);
-    if (config) return config;
+  // 2. 查找全局配置（多个目录）
+  for (const dir of GLOBAL_CONFIG_DIRS) {
+    const globalConfigPath = findConfigFile(dir, GLOBAL_CONFIG_FILES);
+    if (globalConfigPath) {
+      const config = loadConfigFromFile(globalConfigPath);
+      if (config) return config;
+    }
   }
 
   // 3. 返回默认配置（空提示语列表，插件虽启用但无效果）
