@@ -2,6 +2,56 @@
 
 Automatically appends configurable prompts to every user message. Supports **OpenCode**, **Claude Code**, and **GitHub Copilot CLI**.
 
+## Quick Install
+
+### Linux / macOS
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/cmore-air/prompt-appender/main/install.sh)
+```
+
+Or with `wget`:
+
+```bash
+bash <(wget -qO- https://raw.githubusercontent.com/cmore-air/prompt-appender/main/install.sh)
+```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/cmore-air/prompt-appender/main/install.ps1 | iex
+```
+
+The install scripts will automatically:
+
+1. Download the source code (via `git clone` or zip fallback)
+2. Install dependencies and build (`bun install && bun run build`)
+3. Register the OpenCode plugin in `~/.config/opencode/opencode.json`
+4. Register the Claude Code hook in `~/.claude/settings.json`
+5. Create default `prompt-appender.jsonc` config files in both locations
+
+**Options (Linux/macOS):**
+
+```bash
+bash install.sh --dir ~/.local/share/prompt-appender  # custom install dir
+bash install.sh --no-opencode                          # skip OpenCode setup
+bash install.sh --no-claude                            # skip Claude Code setup
+bash install.sh --skip-config                          # skip creating config files
+```
+
+**Options (Windows):**
+
+```powershell
+.\install.ps1 -InstallDir "C:\tools\prompt-appender"  # custom install dir
+.\install.ps1 -NoOpenCode                              # skip OpenCode setup
+.\install.ps1 -NoClaude                               # skip Claude Code setup
+.\install.ps1 -SkipConfig                             # skip creating config files
+```
+
+After installation, **restart OpenCode / Claude Code** for the changes to take effect.
+
+---
+
 ## Features
 
 - Automatically append configurable prompts to every user message
