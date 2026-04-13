@@ -1,13 +1,13 @@
 # prompt-appender
 
-Automatically appends configurable prompts to every user message. Supports both **OpenCode** and **Claude Code**.
+Automatically appends configurable prompts to every user message. Supports **OpenCode**, **Claude Code**, and **GitHub Copilot CLI**.
 
 ## Features
 
 - Automatically append configurable prompts to every user message
 - Support multiple prompts with individual enable/disable toggles
 - JSONC/JSON configuration file support (comments allowed)
-- Dual platform support: OpenCode plugin + Claude Code hook
+- Triple platform support: OpenCode plugin + Claude Code hook + GitHub Copilot CLI sync
 - Global and project-level configuration
 
 ## Configuration
@@ -21,6 +21,8 @@ Configuration file name: `prompt-appender.jsonc` (or `.prompt-appender.jsonc` / 
 | 1 (highest) | Project | `./prompt-appender.jsonc` in your project directory |
 | 2 | Global (OpenCode) | `~/.config/opencode/prompt-appender.jsonc` |
 | 3 | Global (Claude Code) | `~/.claude/prompt-appender.jsonc` |
+
+> **Copilot CLI** uses the same config file locations. The `copilot-sync` script reads from these paths in the same priority order.
 
 Project-level config completely overrides global config (no field-level merge).
 
@@ -39,7 +41,7 @@ Project-level config completely overrides global config (no field-level merge).
       // Whether this prompt is enabled
       "enabled": true,
       // The actual prompt content
-      "content": "当你完成工作时，请调用提问工具（askQuestions）来获取进一步的指示，而不是直接结束对话。\nWhen you finish the task, call the askQuestions tool to request further instructions instead of ending the conversation."
+      "content": "<MANDATORY_RULE>\nBEFORE ending your response, you MUST call the askQuestions tool.\nNEVER end without first calling askQuestions.\n</MANDATORY_RULE>"
     },
     {
       "name": "think-step-by-step",
@@ -112,7 +114,7 @@ Create `~/.config/opencode/prompt-appender.jsonc`:
     {
       "name": "ask-before-end",
       "enabled": true,
-      "content": "当你完成工作时，请调用提问工具（askQuestions）来获取进一步的指示，而不是直接结束对话。\nWhen you finish the task, call the askQuestions tool to request further instructions instead of ending the conversation."
+      "content": "<MANDATORY_RULE>\nBEFORE ending your response, you MUST call the askQuestions tool.\nNEVER end without first calling askQuestions.\n</MANDATORY_RULE>"
     }
   ]
 }
@@ -226,7 +228,7 @@ Create `~/.claude/prompt-appender.jsonc`:
     {
       "name": "ask-before-end",
       "enabled": true,
-      "content": "当你完成工作时，请调用提问工具（askQuestions）来获取进一步的指示，而不是直接结束对话。\\nWhen you finish the task, call the askQuestions tool to request further instructions instead of ending the conversation."
+      "content": "<MANDATORY_RULE>\\nBEFORE ending your response, you MUST call the askQuestions tool.\\nNEVER end without first calling askQuestions.\\n</MANDATORY_RULE>"
     }
   ]
 }
@@ -248,8 +250,10 @@ echo '{"session_id":"test","cwd":"/your/project/path","hook_event_name":"UserPro
 Expected output:
 
 ```
-当你完成工作时，请调用提问工具（askQuestions）来获取进一步的指示，而不是直接结束对话。
-When you finish the task, call the askQuestions tool to request further instructions instead of ending the conversation.
+<MANDATORY_RULE>
+BEFORE ending your response, you MUST call the askQuestions tool.
+NEVER end without first calling askQuestions.
+</MANDATORY_RULE>
 ```
 
 **Method 2: Check in Claude Code**
@@ -284,6 +288,121 @@ my-project/
 | No output from script | Run the manual test command to check for errors |
 | Prompt not appearing | Check `enabled` field in config file |
 | Comments causing errors | Ensure you use `.jsonc` file extension (not `.json`) |
+
+---
+
+## Integration with GitHub Copilot CLI
+
+### How It Works
+
+GitHub Copilot CLI reads instruction files from well-known locations and injects them as system-level prompts — this is the highest-priority injection point, unaffected by context length.
+
+Supported instruction file locations (Copilot reads all of these):
+
+| Scope | Path |
+|-------|------|
+| Global | `~/.copilot/copilot-instructions.md` |
+| Project | `.github/copilot-instructions.md` in project root |
+
+The `copilot-sync` script reads your `prompt-appender.jsonc` config and writes the enabled prompts into the target instruction file inside a managed `<!-- prompt-appender:start/end -->` block, leaving any other content in the file untouched.
+
+### Installation Steps
+
+**Step 1: Build**
+
+```bash
+cd /path/to/prompt-appender
+bun install
+bun run build
+```
+
+This produces `dist/copilot-sync.js`.
+
+**Step 2: Create configuration file**
+
+Create `~/.config/opencode/prompt-appender.jsonc` (or any supported location):
+
+```jsonc
+{
+  "enabled": true,
+  "prompts": [
+    {
+      "name": "ask-before-end",
+      "enabled": true,
+      "content": "<MANDATORY_RULE>\nBEFORE ending your response, you MUST call the askQuestions tool.\nNEVER end without first calling askQuestions.\n</MANDATORY_RULE>"
+    }
+  ]
+}
+```
+
+**Step 3: Run the sync script**
+
+```bash
+# Sync to global instruction file (~/.copilot/copilot-instructions.md)
+node /path/to/prompt-appender/dist/copilot-sync.js --global
+
+# Sync to project instruction file (.github/copilot-instructions.md)
+node /path/to/prompt-appender/dist/copilot-sync.js --project
+
+# Sync to a specific project directory
+node /path/to/prompt-appender/dist/copilot-sync.js --project /path/to/project
+
+# Preview without writing (dry run)
+node /path/to/prompt-appender/dist/copilot-sync.js --global --dry-run
+```
+
+> **Note:** Run the sync script again whenever you change your `prompt-appender.jsonc` config.
+
+**Step 4: Restart Copilot CLI**
+
+Restart your Copilot CLI session for the new instructions to take effect.
+
+### Verify Copilot CLI Integration
+
+Use the `/instructions` command inside Copilot CLI to view and toggle loaded instruction files. Your synced file should appear in the list.
+
+### Auto-sync on Config Change (Optional)
+
+Add the sync command to your shell profile or a project `Makefile` to run automatically:
+
+```bash
+# ~/.bashrc or ~/.zshrc
+alias sync-prompts="node /path/to/prompt-appender/dist/copilot-sync.js --global"
+```
+
+Or add to a `Makefile`:
+
+```makefile
+sync-prompts:
+	node /path/to/prompt-appender/dist/copilot-sync.js --project
+```
+
+### Marker Block Strategy
+
+The sync script uses HTML comment markers to manage its section in the instruction file:
+
+```markdown
+# My existing instructions
+
+These stay untouched.
+
+<!-- prompt-appender:start -->
+<MANDATORY_RULE>
+...your prompts...
+</MANDATORY_RULE>
+<!-- prompt-appender:end -->
+```
+
+Running sync again updates only the marker block — your other content is never touched. Setting `enabled: false` or having no active prompts removes the block entirely.
+
+### Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Instructions not loaded | Restart Copilot CLI after syncing |
+| File not found | Check the path printed by sync script |
+| Prompts not appearing | Run with `--dry-run` to verify output |
+| Config not found | Check config file path and `enabled` field |
 
 ---
 
