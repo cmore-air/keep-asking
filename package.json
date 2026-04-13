@@ -1,7 +1,7 @@
 {
-  "name": "prompt-appender",
+  "name": "keep-asking",
   "version": "1.0.0",
-  "description": "Appends a prompt to every user message so the AI always asks follow-up questions instead of terminating the conversation.",
+  "description": "Forces AI assistants to always follow up with the user instead of silently ending the conversation.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
