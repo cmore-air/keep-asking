@@ -2,53 +2,147 @@
 
 Automatically appends configurable prompts to every user message. Supports **OpenCode**, **Claude Code**, and **GitHub Copilot CLI**.
 
-## Quick Install
+## Quick Install (AI-Powered)
 
-### Linux / macOS
+Copy the prompt below and paste it into your AI assistant (Claude Code, GitHub Copilot CLI, OpenCode, Cursor, etc.). The AI will handle the entire installation for you.
 
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/cmore-air/prompt-appender/main/install.sh)
+```
+<INSTALL_PROMPT_APPENDER>
+You MUST install the prompt-appender tool by following ALL steps below exactly.
+You MUST adapt file paths for the current operating system (Windows / Linux / macOS).
+Do NOT skip any step. Do NOT ask for confirmation between steps. Execute everything in sequence.
+
+<STEP_1>
+<title>Clone the repository</title>
+
+Clone https://github.com/cmore-air/prompt-appender to a permanent location:
+- Linux / macOS:  ~/.local/share/prompt-appender
+- Windows:       %LOCALAPPDATA%\prompt-appender
+
+If the target directory already exists with a .git folder, run `git pull` to update instead of cloning.
+You MUST verify the clone succeeded before proceeding.
+</STEP_1>
+
+<STEP_2>
+<title>Install dependencies and build</title>
+
+cd into the installation directory. You MUST run these commands:
+  bun install
+  bun run build
+
+If bun is not installed, install it first from https://bun.sh.
+
+After build, you MUST verify ALL of the following files exist:
+  - dist/index.js
+  - dist/claude-hook.js
+  - dist/copilot-sync.js
+
+If any file is missing, the build FAILED — do NOT proceed. Report the error.
+</STEP_2>
+
+<STEP_3>
+<title>Configure OpenCode integration</title>
+
+Only execute this step if OpenCode is installed on this machine. Skip otherwise.
+
+1) Register the plugin. Edit ~/.config/opencode/opencode.json.
+   If the file does not exist, create it with content: {}
+   You MUST add the following entry to the "plugin" array (create the array if it does not exist):
+     "file:///<absolute-path-to-install-dir>"
+   Windows example:   "file:///C:/Users/me/AppData/Local/prompt-appender"
+   Linux/macOS example: "file:///home/me/.local/share/prompt-appender"
+
+   IMPORTANT: Do NOT overwrite existing plugin entries. APPEND only.
+
+2) Create the default config at ~/.config/opencode/prompt-appender.jsonc.
+   If the file already exists, do NOT overwrite it. Skip this sub-step.
+   If creating, write EXACTLY this content:
+   {
+     "enabled": true,
+     "prompts": [
+       {
+         "name": "ask-before-end",
+         "enabled": true,
+         "content": "<MANDATORY_RULE>\nBEFORE ending your response, you MUST call the askQuestions tool.\nNEVER end without first calling askQuestions.\n</MANDATORY_RULE>"
+       }
+     ]
+   }
+</STEP_3>
+
+<STEP_4>
+<title>Configure Claude Code integration</title>
+
+Only execute this step if Claude Code is installed on this machine. Skip otherwise.
+
+1) Register the hook. Edit ~/.claude/settings.json.
+   If the file does not exist, create it with content: {}
+   You MUST merge the following JSON into the existing content. NEVER delete existing keys:
+
+   {
+     "hooks": {
+       "UserPromptSubmit": [
+         {
+           "matcher": "",
+           "hooks": [
+             {
+               "type": "command",
+               "command": "node \"<absolute-path-to-install-dir>/dist/claude-hook.js\"",
+               "timeout": 5
+             }
+           ]
+         }
+       ]
+     }
+   }
+
+   CRITICAL merge rules:
+   - If hooks.UserPromptSubmit already has a group with "matcher": "", APPEND the new hook object to that group's hooks array.
+   - If no such group exists, ADD the entire new group.
+   - NEVER duplicate — check by command string before adding.
+
+   Windows example command:   node "C:\Users\me\AppData\Local\prompt-appender\dist\claude-hook.js"
+   Linux/macOS example command: node "/home/me/.local/share/prompt-appender/dist/claude-hook.js"
+
+2) Create the default config at ~/.claude/prompt-appender.jsonc.
+   If the file already exists, do NOT overwrite it. Skip this sub-step.
+   If creating, write EXACTLY this content:
+   {
+     "enabled": true,
+     "prompts": [
+       {
+         "name": "ask-before-end",
+         "enabled": true,
+         "content": "<MANDATORY_RULE>\nBEFORE ending your response, you MUST call the askQuestions tool.\nNEVER end without first calling askQuestions.\n</MANDATORY_RULE>"
+       }
+     ]
+   }
+</STEP_4>
+
+<STEP_5>
+<title>Configure GitHub Copilot CLI (optional)</title>
+
+If the user uses GitHub Copilot CLI, run:
+  node "<absolute-path-to-install-dir>/dist/copilot-sync.js" --global
+
+This writes enabled prompts into ~/.copilot/copilot-instructions.md.
+Skip this step if Copilot CLI is not installed.
+</STEP_5>
+
+<STEP_6>
+<title>Report results</title>
+
+After ALL steps are done, you MUST report:
+1. The installation directory path
+2. Every file you created or modified (full paths)
+3. A reminder to the user: "Restart your AI tool for changes to take effect."
+</STEP_6>
+
+</INSTALL_PROMPT_APPENDER>
 ```
 
-Or with `wget`:
-
-```bash
-bash <(wget -qO- https://raw.githubusercontent.com/cmore-air/prompt-appender/main/install.sh)
-```
-
-### Windows (PowerShell)
-
-```powershell
-irm https://raw.githubusercontent.com/cmore-air/prompt-appender/main/install.ps1 | iex
-```
-
-The install scripts will automatically:
-
-1. Download the source code (via `git clone` or zip fallback)
-2. Install dependencies and build (`bun install && bun run build`)
-3. Register the OpenCode plugin in `~/.config/opencode/opencode.json`
-4. Register the Claude Code hook in `~/.claude/settings.json`
-5. Create default `prompt-appender.jsonc` config files in both locations
-
-**Options (Linux/macOS):**
-
-```bash
-bash install.sh --dir ~/.local/share/prompt-appender  # custom install dir
-bash install.sh --no-opencode                          # skip OpenCode setup
-bash install.sh --no-claude                            # skip Claude Code setup
-bash install.sh --skip-config                          # skip creating config files
-```
-
-**Options (Windows):**
-
-```powershell
-.\install.ps1 -InstallDir "C:\tools\prompt-appender"  # custom install dir
-.\install.ps1 -NoOpenCode                              # skip OpenCode setup
-.\install.ps1 -NoClaude                               # skip Claude Code setup
-.\install.ps1 -SkipConfig                             # skip creating config files
-```
-
-After installation, **restart OpenCode / Claude Code** for the changes to take effect.
+> **Tip:** You can also ask your AI to fetch the raw prompt directly:
+> `curl -fsSL https://raw.githubusercontent.com/cmore-air/prompt-appender/main/README.md`
+> Then tell it to find the "Quick Install" section and follow the instructions.
 
 ---
 
