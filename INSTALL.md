@@ -68,7 +68,7 @@ You MUST merge the following JSON into the existing content. NEVER delete existi
           {
             "type": "command",
             "command": "node \"<absolute-path-to-install-dir>/dist/claude-hook.js\"",
-            "timeout": 5
+            "timeout": 60
           }
         ]
       }

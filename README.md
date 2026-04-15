@@ -78,7 +78,7 @@ Uses a `UserPromptSubmit` hook. The script outputs the prompt to stdout; Claude 
           {
             "type": "command",
             "command": "node \"/absolute/path/to/keep-asking/dist/claude-hook.js\"",
-            "timeout": 5
+            "timeout": 60
           }
         ]
       }
